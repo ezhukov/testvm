@@ -1,0 +1,42 @@
+---
+- hosts: testvm
+  become: yes
+
+  vars:
+    package: saxonhe
+
+  tasks:
+
+  - apt_repository:
+      repo: deb-src http://httpredir.debian.org/debian sid main
+      state: present
+
+  - name: install build tools
+    apt:
+      update_cache: yes
+      state: latest
+      name: "{{ item }}"
+    with_items:
+      - build-essential
+      - fakeroot
+      - devscripts
+
+  - name: install package build-dependencies
+    command: apt build-dep -y saxonhe
+    changed_when: False
+
+  - name: check if package folder exists
+    stat:
+      path: "{{ package }}"
+    register: pkg_folder
+
+  - name: debcheckout package
+    command: debcheckout "{{ package }}"
+    when: not pkg_folder.stat.exists
+
+  - name: build package
+    command: dpkg-buildpackage -uc -us -b
+    args:
+      chdir: "{{ package }}"
+    changed_when: False
+

@@ -1,0 +1,52 @@
+---
+- hosts: local
+  become: yes
+
+  vars:
+    image_size: 5G
+    image_name: image.img
+    vm_name: testvm
+
+  tasks:
+  - name: check if image exists
+    stat:
+      path: "{{ image_name }}"
+    register: image
+
+  - name: vmdebootstrap image
+    command: >
+      vmdebootstrap
+        --distribution sid
+        --image {{ image_name }}
+        --size {{ image_size }}
+        --hostname {{ vm_name }}
+        --user {{ vm_name }}/changeit
+        --sudo
+        --grub
+        --configure-apt
+        --serial-console
+        --package openssh-server
+        --package python
+    when: not image.stat.exists
+
+  - name: fire up vm
+    command: >
+      kvm
+        -name {{ vm_name }}
+        -enable-kvm
+        -cpu kvm64
+        -smp cpus=4
+        -m 4096
+        -display vnc=:0
+        -drive file={{ image_name }},format=raw
+        -net nic
+        -net user,hostfwd=tcp:127.0.0.3:2222-:22
+    async: 10000
+    poll: 0
+
+  - name: wait for testvm to come up
+    wait_for:
+      host: 127.0.0.3
+      port: 2222
+      delay: 20
+
