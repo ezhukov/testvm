@@ -22,7 +22,7 @@
       - devscripts
 
   - name: install package build-dependencies
-    command: apt build-dep -y saxonhe
+    shell: yes | mk-build-deps -ir "{{ package }}"
     changed_when: False
 
   - name: check if package folder exists
@@ -40,3 +40,8 @@
       chdir: "{{ package }}"
     changed_when: False
 
+  - name: remove package build dependencies
+    apt:
+      state: absent
+      name: "{{ package }}-build-deps"
+      autoremove: yes
