@@ -2,9 +2,6 @@
 - hosts: testvm
   become: yes
 
-  vars:
-    package: saxonhe
-
   tasks:
 
   - apt_repository:
@@ -37,7 +34,6 @@
     command: dpkg-buildpackage -uc -us -b
     args:
       chdir: "{{ package }}"
-    changed_when: False
 
   - name: remove package build dependencies
     apt:
@@ -46,7 +42,7 @@
       autoremove: yes
 
   - name: list deb files
-    shell: find . -name *.deb
+    shell: find . -name "*.deb"
     register: deb_result
 
   - name: install debs
