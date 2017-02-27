@@ -4,9 +4,18 @@
 
   tasks:
 
-  - apt_repository:
+  - name: add source repository
+    apt_repository:
       repo: deb-src http://httpredir.debian.org/debian sid main
       state: present
+
+  - name: add en_US locale
+    lineinfile:
+      path: /etc/locale.gen
+      line: 'en_US.UTF-8 UTF-8'
+
+  - name: regenerate locales
+    command: locale-gen
 
   - name: install build tools
     apt:
@@ -49,3 +58,7 @@
     apt:
       deb: "{{ item }}"
     with_items: "{{ deb_result.stdout_lines }}"
+
+  - name: find package reverse build dpendencies
+    shell: grep Package "{{ package }}/debian/control" | cut -d: -f2 | xargs build-rdeps --only-main --old --quiet
+    register: rdeps_result
