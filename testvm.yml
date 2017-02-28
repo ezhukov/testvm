@@ -1,6 +1,5 @@
 ---
 - hosts: testvm
-  become: yes
 
   tasks:
 
@@ -8,16 +7,19 @@
     apt_repository:
       repo: deb-src http://httpredir.debian.org/debian sid main
       state: present
+    become: yes
 
   - name: add en_US locale
     lineinfile:
       dest: /etc/locale.gen
       line: 'en_US.UTF-8 UTF-8'
     register: locale_added
+    become: yes
 
   - name: regenerate locales
     command: locale-gen
     when: locale_added.changed
+    become: yes
 
   - name: install build tools
     apt:
@@ -28,8 +30,32 @@
       - build-essential
       - fakeroot
       - devscripts
+    become: yes
 
-  - include: rebuild.yml pkg={{package}}
+  - name: install {{ package }} build-dependencies
+    shell: yes | mk-build-deps -ir "{{ package }}"
+    become: yes
+
+  - name: check if {{ package }} folder exists
+    stat:
+      path: "{{ package }}"
+    register: pkg_folder
+
+  - name: debcheckout {{ package }}
+    command: debcheckout "{{ package }}"
+    when: not pkg_folder.stat.exists
+
+  - name: build {{ package }}
+    command: dpkg-buildpackage -uc -us -b
+    args:
+      chdir: "{{ package }}"
+
+  - name: remove {{ package }} build dependencies
+    apt:
+      state: absent
+      name: "{{ package }}-build-deps"
+      autoremove: yes
+    become: yes
 
   - name: list deb files
     shell: find . -name "*{{ package }}*.deb"
@@ -39,6 +65,7 @@
     apt:
       deb: "{{ item }}"
     with_items: "{{ deb_result.stdout_lines }}"
+    become: yes
 
   - name: find {{ package }} reverse build dpendencies
     shell: >

@@ -1,22 +1,22 @@
 - name: install {{ pkg }} build-dependencies
   shell: yes | mk-build-deps -ir "{{ pkg }}"
+  become: yes
 
-- name: check if {{ pkg }} folder exists
-  stat:
-    path: "{{ pkg }}"
-  register: pkg_folder
+- name: apt source {{ pkg }}
+  command: apt source "{{ pkg }}"
 
-- name: debcheckout {{ pkg }}
-  command: debcheckout "{{ pkg }}"
-  when: not pkg_folder.stat.exists
+- name: find source folder
+  command: find . -type d -name "{{ pkg }}*"
+  register: source_folder
 
 - name: build {{ pkg }}
   command: dpkg-buildpackage -uc -us -b
   args:
-    chdir: "{{ pkg }}"
+    chdir: "{{ source_folder.stdout_lines.0 }}"
 
 - name: remove {{ pkg }} build dependencies
   apt:
     state: absent
     name: "{{ pkg }}-build-deps"
     autoremove: yes
+  become: yes
