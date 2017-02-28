@@ -29,11 +29,10 @@
       - fakeroot
       - devscripts
 
-  - name: rebuild the package
-    include: rebuild.yml pkg={{package}}
+  - include: rebuild.yml pkg={{package}}
 
   - name: list deb files
-    shell: find . -name "*.deb"
+    shell: find . -name "*{{ package }}*.deb"
     register: deb_result
 
   - name: install debs
@@ -41,14 +40,14 @@
       deb: "{{ item }}"
     with_items: "{{ deb_result.stdout_lines }}"
 
-  - name: find package reverse build dpendencies
+  - name: find {{ package }} reverse build dpendencies
     shell: >
       grep Package "{{ package }}/debian/control"
       | cut -d: -f2
       | xargs build-rdeps --only-main --old --quiet
     register: build_rdeps_result
 
-  - name: rebuild package reverse build dpendencies
+  - name: rebuild {{ package }} reverse build dpendencies
     include: rebuild.yml pkg={{item}}
     static: no
     with_items: "{{ build_rdeps_result.stdout_lines }}"
