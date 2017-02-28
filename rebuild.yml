@@ -1,0 +1,22 @@
+- name: install package build-dependencies
+  shell: yes | mk-build-deps -ir "{{ pkg }}"
+
+- name: check if package folder exists
+  stat:
+    path: "{{ pkg }}"
+  register: pkg_folder
+
+- name: debcheckout package
+  command: debcheckout "{{ pkg }}"
+  when: not pkg_folder.stat.exists
+
+- name: build package
+  command: dpkg-buildpackage -uc -us -b
+  args:
+    chdir: "{{ pkg }}"
+
+- name: remove package build dependencies
+  apt:
+    state: absent
+    name: "{{ pkg }}-build-deps"
+    autoremove: yes

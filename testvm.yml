@@ -29,28 +29,8 @@
       - fakeroot
       - devscripts
 
-  - name: install package build-dependencies
-    shell: yes | mk-build-deps -ir "{{ package }}"
-
-  - name: check if package folder exists
-    stat:
-      path: "{{ package }}"
-    register: pkg_folder
-
-  - name: debcheckout package
-    command: debcheckout "{{ package }}"
-    when: not pkg_folder.stat.exists
-
-  - name: build package
-    command: dpkg-buildpackage -uc -us -b
-    args:
-      chdir: "{{ package }}"
-
-  - name: remove package build dependencies
-    apt:
-      state: absent
-      name: "{{ package }}-build-deps"
-      autoremove: yes
+  - name: rebuild the package
+    include: rebuild.yml pkg={{package}}
 
   - name: list deb files
     shell: find . -name "*.deb"
@@ -67,3 +47,8 @@
       | cut -d: -f2
       | xargs build-rdeps --only-main --old --quiet
     register: build_rdeps_result
+
+  - name: rebuild package reverse build dpendencies
+    include: rebuild.yml pkg={{item}}
+    static: no
+    with_items: "{{ build_rdeps_result.stdout_lines }}"
