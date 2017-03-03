@@ -28,6 +28,13 @@
         --package openssh-server
         --package python
         --package locales
+        --package build-essential
+        --package fakeroot
+        --package devscripts
+        --package subversion
+        --package git
+        --package equivs
+        --package dctrl-tools
     when: not image.stat.exists
 
   - name: fire up vm

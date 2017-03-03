@@ -16,20 +16,9 @@
     register: locale_added
     become: yes
 
-  - name: regenerate locales
+  - name: re-generate locales
     command: locale-gen
     when: locale_added.changed
-    become: yes
-
-  - name: install build tools
-    apt:
-      update_cache: yes
-      state: latest
-      name: "{{ item }}"
-    with_items:
-      - build-essential
-      - fakeroot
-      - devscripts
     become: yes
 
   - name: install {{ package }} build-dependencies

@@ -2,11 +2,17 @@
   shell: yes | mk-build-deps -ir "{{ pkg }}"
   become: yes
 
-- name: apt source {{ pkg }}
+- name: debcheckout {{ pkg }}
+  command: debcheckout "{{ pkg }}"
+  register: debcheckout_result
+  ignore_errors: yes
+
+- name: fallback to apt source if debcheckout fails
   command: apt source "{{ pkg }}"
+  when: "'checkout failed' in debcheckout_result.stderr"
 
 - name: find source folder
-  command: find . -type d -name "{{ pkg }}*"
+  command: find . -maxdepth 1 -type d -name "{{ pkg }}*"
   register: source_folder
 
 - name: build {{ pkg }}
