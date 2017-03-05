@@ -1,24 +1,31 @@
-- name: install {{ pkg }} build-dependencies
-  shell: yes | mk-build-deps -ir "{{ pkg }}"
-  become: yes
+- name: find deb file
+  command: find . -name "*{{ pkg }}*.deb"
+  register: deb_file
 
 - name: debcheckout {{ pkg }}
   command: debcheckout "{{ pkg }}"
-  register: debcheckout_result
+  register: checkout
   ignore_errors: yes
+  when: deb_file.stdout == ""
 
 - name: fallback to apt source if debcheckout fails
   command: apt source "{{ pkg }}"
-  when: "'checkout failed' in debcheckout_result.stderr"
+  when: "checkout is defined and 'checkout failed' in checkout.stderr"
 
 - name: find source folder
   command: find . -maxdepth 1 -type d -name "{{ pkg }}*"
   register: source_folder
 
+- name: install {{ pkg }} build-dependencies
+  shell: yes | mk-build-deps -ir "{{ pkg }}"
+  become: yes
+  when: deb_file.stdout == ""
+
 - name: build {{ pkg }}
   command: dpkg-buildpackage -uc -us -b
   args:
     chdir: "{{ source_folder.stdout_lines.0 }}"
+  when: deb_file.stdout == ""
 
 - name: remove {{ pkg }} build dependencies
   apt:
@@ -26,3 +33,4 @@
     name: "{{ pkg }}-build-deps"
     autoremove: yes
   become: yes
+  when: deb_file.stdout == ""

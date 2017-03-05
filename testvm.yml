@@ -21,10 +21,6 @@
     when: locale_added.changed
     become: yes
 
-  - name: install {{ package }} build-dependencies
-    shell: yes | mk-build-deps -ir "{{ package }}"
-    become: yes
-
   - name: check if {{ package }} folder exists
     stat:
       path: "{{ package }}"
@@ -33,6 +29,20 @@
   - name: debcheckout {{ package }}
     command: debcheckout "{{ package }}"
     when: not pkg_folder.stat.exists
+
+  - name: find {{ package }} binaries
+    shell: grep "Package:" "{{ package }}/debian/control" | cut -d ' ' -f2
+    register: binaries
+
+  - name: find {{ package }} version
+    command: dpkg-parsechangelog -SVersion
+    args:
+      chdir: "{{ package }}"
+    register: version
+
+  - name: install {{ package }} build-dependencies
+    shell: yes | mk-build-deps -ir "{{ package }}"
+    become: yes
 
   - name: build {{ package }}
     command: dpkg-buildpackage -uc -us -b
@@ -46,24 +56,18 @@
       autoremove: yes
     become: yes
 
-  - name: list deb files
-    shell: find . -name "*{{ package }}*.deb"
-    register: deb_result
-
   - name: install debs
     apt:
-      deb: "{{ item }}"
-    with_items: "{{ deb_result.stdout_lines }}"
+      deb: "{{ item }}_{{ version.stdout }}_all.deb"
+    with_items: "{{ binaries.stdout_lines }}"
     become: yes
 
   - name: find {{ package }} reverse build dpendencies
-    shell: >
-      grep Package "{{ package }}/debian/control"
-      | cut -d: -f2
-      | xargs build-rdeps --only-main --old --quiet
+    command: build-rdeps --only-main --old --quiet {{item}}
+    with_items: "{{ binaries.stdout_lines }}"
     register: build_rdeps_result
 
   - name: rebuild {{ package }} reverse build dpendencies
     include: rebuild.yml pkg={{item}}
     static: no
-    with_items: "{{ build_rdeps_result.stdout_lines }}"
+    with_items: "{{ build_rdeps_result.results[0].stdout_lines }}"
