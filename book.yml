@@ -35,6 +35,7 @@
         --package git
         --package equivs
         --package dctrl-tools
+        --package ca-certificates
     when: not image.stat.exists
 
   - name: fire up vm
