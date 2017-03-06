@@ -35,6 +35,8 @@
     register: build_rdeps_result
 
   - name: rebuild {{ package }} reverse build dpendencies
-    include: build.yml pkg={{item}}
+    include: rdeps.yml
     static: no
-    with_items: "{{ build_rdeps_result.results[0].stdout_lines }}"
+    with_items: "{{ build_rdeps_result.results }}"
+    loop_control:
+      loop_var: rdeps

@@ -1,0 +1,3 @@
+- include: build.yml pkg={{item}}
+  static: no
+  with_items: "{{ rdeps.stdout_lines }}"
