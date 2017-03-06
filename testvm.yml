@@ -21,47 +21,7 @@
     when: locale_added.changed
     become: yes
 
-  - name: check if {{ package }} folder exists
-    stat:
-      path: "{{ package }}"
-    register: pkg_folder
-
-  - name: debcheckout {{ package }}
-    command: debcheckout "{{ package }}"
-    when: not pkg_folder.stat.exists
-
-  - name: find {{ package }} binaries
-    shell: grep "Package:" "{{ package }}/debian/control" | cut -d ' ' -f2
-    register: binaries
-
-  - name: find {{ package }} version
-    command: dpkg-parsechangelog -SVersion
-    args:
-      chdir: "{{ package }}"
-    register: version
-
-  - name: check if {{ package }} was already built
-    stat:
-      path: "{{ binaries.stdout_lines[0] }}_{{ version.stdout }}_all.deb"
-    register: built
-
-  - name: install {{ package }} build-dependencies
-    shell: yes | mk-build-deps -ir "{{ package }}"
-    become: yes
-    when: not built.stat.exists
-
-  - name: build {{ package }}
-    command: dpkg-buildpackage -uc -us -b
-    args:
-      chdir: "{{ package }}"
-    when: not built.stat.exists
-
-  - name: remove {{ package }} build dependencies
-    apt:
-      state: absent
-      name: "{{ package }}-build-deps"
-      autoremove: yes
-    become: yes
+  - include: build.yml pkg={{package}}
 
   - name: install debs
     apt:
@@ -75,6 +35,6 @@
     register: build_rdeps_result
 
   - name: rebuild {{ package }} reverse build dpendencies
-    include: rebuild.yml pkg={{item}}
+    include: build.yml pkg={{item}}
     static: no
     with_items: "{{ build_rdeps_result.results[0].stdout_lines }}"

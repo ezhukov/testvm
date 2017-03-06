@@ -1,0 +1,41 @@
+- name: check if {{ pkg }} folder exists
+  stat:
+    path: "{{ pkg }}"
+  register: pkg_folder
+
+- name: debcheckout {{ pkg }}
+  command: debcheckout "{{ pkg }}"
+  when: not pkg_folder.stat.exists
+
+- name: find {{ pkg }} binaries
+  shell: grep "Package:" "{{ pkg }}/debian/control" | cut -d ' ' -f2
+  register: binaries
+
+- name: find {{ pkg }} version
+  command: dpkg-parsechangelog -SVersion
+  args:
+    chdir: "{{ pkg }}"
+  register: version
+
+- name: check if {{ pkg }} was already built
+  stat:
+    path: "{{ binaries.stdout_lines[0] }}_{{ version.stdout }}_all.deb"
+  register: built
+
+- name: install {{ pkg }} build-dependencies
+  shell: yes | mk-build-deps -ir "{{ pkg }}"
+  become: yes
+  when: not built.stat.exists
+
+- name: build {{ pkg }}
+  command: dpkg-buildpackage -uc -us -b
+  args:
+    chdir: "{{ pkg }}"
+  when: not built.stat.exists
+
+- name: remove {{ pkg }} build dependencies
+  apt:
+    state: absent
+    name: "{{ pkg }}-build-deps"
+    autoremove: yes
+  become: yes
