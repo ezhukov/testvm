@@ -20,11 +20,9 @@ At least the following packages need to be installed:
 
 ### Advantages of this solution
 
-If playbook execution fails - just ssh to the VM and fix the problem,
-then re-run the playbook.
+If playbook execution fails - just ssh to the VM to fix the problem, the password
+is 'changeit':
 
     $ ssh -p 2222 testvm@127.0.0.3
-
-The playbooks are idempotent, therefore can be run unlimited amount of times.
-The build avoidance is in place, so no packages will be built twice, unless build
-artifacts are manually cleaned.
+Then re-run the playbook. The playbooks are idempotent and build avoidance is in
+place.
