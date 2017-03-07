@@ -10,8 +10,8 @@ At least the following packages need to be installed:
 
 ### How to use
 
-$ ansible-playbook -K -i invent book.yml
-$ ansible-playbook -i invent testvm.yml --extra-vars package=your-package-name
+    $ ansible-playbook -K -i invent book.yml
+    $ ansible-playbook -i invent testvm.yml --extra-vars package=your-package-name
 
 ### Known limitations
 
@@ -25,5 +25,5 @@ then re-run the playbook.
 $ ssh -p 2222 testvm@127.0.0.3
 
 The playbooks are idempotent, therefore can be run unlimited amount of times.
-The build avoidance is place, so no packages will be built twice, unless build
+The build avoidance is in place, so no packages will be built twice, unless build
 artifacts are manually cleaned.
