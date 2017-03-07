@@ -22,7 +22,7 @@ At least the following packages need to be installed:
 
 If playbook execution fails - just ssh to the VM and fix the problem,
 then re-run the playbook.
-$ ssh -p 2222 testvm@127.0.0.3
+    $ ssh -p 2222 testvm@127.0.0.3
 
 The playbooks are idempotent, therefore can be run unlimited amount of times.
 The build avoidance is in place, so no packages will be built twice, unless build
