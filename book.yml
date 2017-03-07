@@ -3,7 +3,7 @@
   become: yes
 
   vars:
-    image_size: 5G
+    image_size: 10G
     image_name: image.img
     vm_name: testvm
 
@@ -36,6 +36,7 @@
         --package equivs
         --package dctrl-tools
         --package ca-certificates
+        --package dose-extra
     when: not image.stat.exists
 
   - name: fire up vm
