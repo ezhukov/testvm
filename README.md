@@ -1,17 +1,29 @@
 # testvm
-Rebuilding package build dependencies
+Rebuilding reverse build dependencies of a package
 
-## Running instructions
+### Prerequisites
 
-### 1. Create a VM
+At least the following packages need to be installed:
+ * qemu-kvm
+ * ansible
+ * vmdebootstrap
 
-ansible-playbook -K -i invent book.yml
+### How to use
 
-### 2. Build and install a package
+$ ansible-playbook -K -i invent book.yml
+$ ansible-playbook -i invent testvm.yml --extra-vars package=your-package-name
 
-ansible-playbook -i invent testvm.yml --extra-vars package=jing-trang
-
-### 3. Known limitations
+### Known limitations
 
  * currently only architecture type 'all' is supported
- * if debcheckout fails, need to ssh to VM and get source
+ * 'build-rdeps --only-main --old' is used to find package reverse build dependencies
+
+### Advantages of this solution
+
+If playbook execution fails - just ssh to the VM and fix the problem,
+then re-run the playbook.
+$ ssh -p 2222 testvm@127.0.0.3
+
+The playbooks are idempotent, therefore can be run unlimited amount of times.
+The build avoidance is place, so no packages will be built twice, unless build
+artifacts are manually cleaned.

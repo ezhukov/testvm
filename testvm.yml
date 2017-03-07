@@ -29,12 +29,12 @@
     with_items: "{{ binaries.stdout_lines }}"
     become: yes
 
-  - name: find {{ package }} reverse build dpendencies
+  - name: find {{ package }} reverse build dependencies
     command: build-rdeps --only-main --old --quiet {{item}}
     with_items: "{{ binaries.stdout_lines }}"
     register: build_rdeps_result
 
-  - name: rebuild {{ package }} reverse build dpendencies
+  - name: rebuild {{ package }} reverse build dependencies
     include: rdeps.yml
     static: no
     with_items: "{{ build_rdeps_result.results }}"
