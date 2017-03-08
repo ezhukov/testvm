@@ -23,18 +23,18 @@
 
   - include: build.yml pkg={{package}}
 
-  - name: install debs
+  - name: install {{ package }} binaries
     apt:
       deb: "{{ item }}_{{ version.stdout }}_all.deb"
     with_items: "{{ binaries.stdout_lines }}"
     become: yes
 
-  - name: find {{ package }} reverse build dependencies
-    command: build-rdeps --only-main --old --quiet {{item}}
+  - name: find reverse build dependencies of each binary
+    command: build-rdeps --only-main --quiet {{item}}
     with_items: "{{ binaries.stdout_lines }}"
     register: build_rdeps_result
 
-  - name: rebuild {{ package }} reverse build dependencies
+  - name: rebuild reverse build dependencies of each binary
     include: rdeps.yml
     static: no
     with_items: "{{ build_rdeps_result.results }}"
