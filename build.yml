@@ -8,18 +8,17 @@
   when: not pkg_folder.stat.exists
 
 - name: find {{ pkg }} binaries
-  shell: grep "Package:" "{{ pkg }}/debian/control" | cut -d ' ' -f2
-  register: binaries
-
-- name: find {{ pkg }} version
-  command: dpkg-parsechangelog -SVersion
+  shell: >
+    grep -E "(Package:|Architecture:)" debian/control
+    | cut -d " " -f2
+    | sed "N; s/\n/_$(dpkg-parsechangelog -SVersion)_/"
   args:
     chdir: "{{ pkg }}"
-  register: version
+  register: debs
 
 - name: check if {{ pkg }} was already built
   stat:
-    path: "{{ binaries.stdout_lines[0] }}_{{ version.stdout }}_all.deb"
+    path: "{{ debs.stdout_lines[0] }}.deb"
   register: built
 
 - name: install {{ pkg }} build-dependencies
