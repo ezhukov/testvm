@@ -22,5 +22,4 @@ place.
 
 ### About this solution
 
-Currently only architecture type 'all' is supported; build-rdeps finds package
-reverse build dependencies.
+The reverse build dependencies of a package are found with build-rdeps tool.
