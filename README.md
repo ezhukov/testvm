@@ -1,5 +1,11 @@
-# testvm
-Rebuilding reverse build dependencies of a package
+## Rebuilding reverse build dependencies of a package
+
+A virtual machine image is created with vmdebootstrap and started with kvm.
+The specified package then checked out with debcheckout, built and all binaries
+installed.
+Reverse build dependencies of that package are found with build-rdeps tool,
+then checked out with debcheckout and built.
+All of the above is managed by ansible.
 
 ### Prerequisites
 
@@ -10,8 +16,8 @@ At least the following packages need to be installed:
 
 ### How to use
 
-    $ ansible-playbook -K -i invent book.yml
-    $ ansible-playbook -i invent testvm.yml --extra-vars package=your-package-name
+    $ ansible-playbook -K -i inventory vm.yml
+    $ ansible-playbook -i inventory provision.yml --extra-vars package=your-package-name
 
 If playbook execution fails - just ssh to the VM to fix the problem, the password
 is 'changeit':
@@ -20,6 +26,4 @@ is 'changeit':
 Then re-run the playbook. The playbooks are idempotent and build avoidance is in
 place.
 
-### About this solution
-
-The reverse build dependencies of a package are found with build-rdeps tool.
+TODO: Add support for packages with architecture other than 'all'.
