@@ -11,7 +11,8 @@
   shell: >
     grep -E "(Package:|Architecture:)" debian/control
     | cut -d " " -f2
-    | sed "N; s/\n/_$(dpkg-parsechangelog -SVersion)_/"
+    | sed -e "N; s/\n/_$(dpkg-parsechangelog -SVersion)_/"
+    -e "/_/ { s/any/{{ arch }}/ }"
   args:
     chdir: "{{ pkg }}"
   register: debs

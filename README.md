@@ -25,5 +25,3 @@ is 'changeit':
     $ ssh -p 2222 testvm@127.0.0.3
 Then re-run the playbook. The playbooks are idempotent and build avoidance is in
 place.
-
-TODO: Add support for packages with architecture other than 'all'.

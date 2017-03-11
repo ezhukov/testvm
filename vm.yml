@@ -1,5 +1,5 @@
 ---
-- hosts: local
+- hosts: localhost
   become: yes
 
   vars:
@@ -16,6 +16,7 @@
   - name: vmdebootstrap image
     command: >
       vmdebootstrap
+        --arch {{ arch }}
         --distribution sid
         --image {{ image_name }}
         --size {{ image_size }}
