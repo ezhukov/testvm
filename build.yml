@@ -16,6 +16,7 @@
   args:
     chdir: "{{ pkg }}"
   register: debs
+  changed_when: false
 
 - name: check if {{ pkg }} was already built
   stat:

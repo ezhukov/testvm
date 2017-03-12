@@ -33,6 +33,7 @@
     command: build-rdeps --only-main --quiet {{item.split("_")[0]}}
     with_items: "{{ debs.stdout_lines }}"
     register: build_rdeps_result
+    changed_when: false
 
   - name: rebuild reverse build dependencies of each binary
     include: rdeps.yml
