@@ -44,12 +44,10 @@
     command: >
       kvm
         -name {{ vm_name }}
-        -enable-kvm
-        -cpu kvm64
-        -smp cpus=4
+        -smp 4
         -m 4096
-        -display vnc=:0
-        -drive file={{ image_name }},format=raw
+        -display none
+        -drive file={{ image_name }}
         -net nic
         -net user,hostfwd=tcp:127.0.0.3:2222-:22
     async: 10000
