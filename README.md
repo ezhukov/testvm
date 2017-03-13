@@ -16,8 +16,13 @@ At least the following packages need to be installed:
 
 ### How to use
 
+First create a virtual machine by running (requires sudo privileges):
+
     $ ansible-playbook -K -i inventory vm.yml
-    $ ansible-playbook -i inventory provision.yml --extra-vars package=your-package-name
+
+Then specify a package name in the inventory file and run:
+
+    $ ansible-playbook -i inventory provision.yml
 
 If playbook execution fails - just ssh to the VM to fix the problem, the password
 is 'changeit':

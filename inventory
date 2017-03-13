@@ -1,8 +1,9 @@
 [testvm]
 localhost ansible_connection=local
-vm ansible_host=127.0.0.3 ansible_port=2222 ansible_user=testvm ansible_become_pass=changeit
+vm ansible_host=127.0.0.3 ansible_port=2222 ansible_user=testvm ansible_become_pass='{{ ansible_ssh_pass }}'
 
 [testvm:vars]
 arch=amd64
+package=
 ansible_ssh_pass=changeit
 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'

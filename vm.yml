@@ -3,14 +3,12 @@
   become: yes
 
   vars:
-    image_size: 10G
-    image_name: image.img
-    vm_name: testvm
+    image_file: image.img
 
   tasks:
   - name: check if image exists
     stat:
-      path: "{{ image_name }}"
+      path: "{{ image_file }}"
     register: image
 
   - name: vmdebootstrap image
@@ -18,10 +16,10 @@
       vmdebootstrap
         --arch {{ arch }}
         --distribution sid
-        --image {{ image_name }}
-        --size {{ image_size }}
-        --hostname {{ vm_name }}
-        --user {{ vm_name }}/changeit
+        --image {{ image_file }}
+        --size 10G
+        --hostname {{ hostvars['vm'].ansible_user }}
+        --user {{ hostvars['vm'].ansible_user }}/{{ ansible_ssh_pass }}
         --sudo
         --grub
         --configure-apt
@@ -43,19 +41,19 @@
   - name: fire up vm
     command: >
       kvm
-        -name {{ vm_name }}
+        -name {{ hostvars['vm'].ansible_user }}
         -smp 4
         -m 4096
         -display none
-        -drive file={{ image_name }}
+        -drive file={{ image_file }}
         -net nic
-        -net user,hostfwd=tcp:127.0.0.3:2222-:22
+        -net user,hostfwd=tcp:{{ hostvars['vm'].ansible_host }}:{{ hostvars['vm'].ansible_port }}-:22
     async: 10000
     poll: 0
 
   - name: wait for testvm to come up
     wait_for:
-      host: 127.0.0.3
-      port: 2222
+      host: "{{ hostvars['vm'].ansible_host }}"
+      port: "{{ hostvars['vm'].ansible_port }}"
       delay: 20
 

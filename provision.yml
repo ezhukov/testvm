@@ -21,6 +21,11 @@
     when: locale_added.changed
     become: yes
 
+  - name: fail if package is not specified
+    fail:
+      msg: "Please provide a package name in the inventory"
+    when: package is undefined or package == ''
+
   - include: build.yml pkg={{package}}
 
   - name: install {{ package }} binaries
