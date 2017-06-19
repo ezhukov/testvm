@@ -1,3 +1,4 @@
 - include: build.yml pkg={{item}}
   static: no
   with_items: "{{ rdeps.stdout_lines }}"
+  when: '"{{item}}" not in exclude_from_build.split(",")'
