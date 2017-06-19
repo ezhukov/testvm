@@ -19,14 +19,13 @@ At least the following packages need to be installed:
 First create a virtual machine by running (requires sudo privileges):
 
     $ ansible-playbook -K -i inventory vm.yml
-
 Then specify a package name in the inventory file and run:
 
     $ ansible-playbook -i inventory provision.yml
-
 If playbook execution fails - just ssh to the VM to fix the problem, the password
 is 'changeit':
 
     $ ssh -p 2222 testvm@127.0.0.3
 Then re-run the playbook. The playbooks are idempotent and build avoidance is in
-place.
+place. In case you need to exclude some reverse build dependencies from the
+build, add these (comma separated) to `exclude_from_build` variable in inventory.
